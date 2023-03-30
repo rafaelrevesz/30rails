@@ -7,6 +7,8 @@ import com.siemens.mo.thirtyrails.map.persistence.MapEntity;
 import com.siemens.mo.thirtyrails.map.persistence.MapItemEntity;
 import com.siemens.mo.thirtyrails.map.persistence.MapItemRepository;
 import com.siemens.mo.thirtyrails.map.persistence.MapRepository;
+import com.siemens.mo.thirtyrails.map.track.TrackItem;
+import com.siemens.mo.thirtyrails.map.track.TrackItemFactory;
 import com.siemens.mo.thirtyrails.player.Player;
 import com.siemens.mo.thirtyrails.player.PlayerService;
 import com.siemens.mo.thirtyrails.position.Position;
@@ -171,15 +173,10 @@ public class MapService {
             return true;
         }
         if (orientation == BOTTOM || orientation == TOP) {
-            if (mapItems.stream().filter(mapItem -> mapItem.getY() == position.row()).count() == 1) {
-                return true;
-            }
+            return mapItems.stream().filter(mapItem -> mapItem.getY() == position.row()).count() == 1;
         } else {
-            if (mapItems.stream().filter(mapItem -> mapItem.getX() == position.col()).count() == 1) {
-                return true;
-            }
+            return mapItems.stream().filter(mapItem -> mapItem.getX() == position.col()).count() == 1;
         }
-        return false;
     }
 
     private boolean isStationSetupReady(MapEntity map) {
@@ -199,8 +196,37 @@ public class MapService {
                 map.setBonus(mapItem.asPosition());
             } else if (mapItem.getType().startsWith("Station")) {
                 map.setStation(mapItem.asPosition(), Integer.parseInt(mapItem.getType().replace("Station", "")));
+            } else {
+                try {
+                    map.addTrack(TrackItemFactory.get(mapItem));
+                } catch (Exception e) {
+                    log.error("Cannot create track from type " + mapItem.getType());
+                }
             }
         }
         return map;
+    }
+
+    @Transactional
+    public <T extends TrackItem> void setTrack(int gameId, String playerName, T track) {
+        var game = gameRepository.findById(gameId).orElseThrow();
+        if (game.getState() != GameState.PLAY) {
+            throw new IllegalStateException("Game is not active");
+        }
+        var dicePair = diceRollService.getDiceRollByPlayer(gameId, playerName);
+        if (track.getPosition().row() != dicePair.bwDice().getValue() && track.getPosition().col() != dicePair.bwDice().getValue()) {
+            throw new IllegalArgumentException("Dice roll must be used");
+        }
+        MapEntity map = getMapByGameIdAnPlayerName(gameId, playerName);
+        if (!isStationSetupReady(map)) {
+            throw new IllegalStateException("Map setup is not ready yet");
+        }
+        var field = mapItemRepository.findByMapAndXAndY(map, track.getPosition().col(), track.getPosition().row());
+        if (field.isPresent() && !field.get().getType().equals("Bonus")) {
+            throw new IllegalArgumentException("Field is already set by " + field.get().getType());
+        }
+
+        mapItemRepository.save(MapItemEntity.of(map, track));
+        playerService.nextTurn(gameId, playerName);
     }
 }

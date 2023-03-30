@@ -1,5 +1,7 @@
 package com.siemens.mo.thirtyrails.map.persistence;
 
+import com.siemens.mo.thirtyrails.map.Rotation;
+import com.siemens.mo.thirtyrails.map.track.TrackItem;
 import com.siemens.mo.thirtyrails.position.Position;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,8 +28,19 @@ public class MapItemEntity {
     private int x;
     private int y;
     private String type;
+    private Rotation rotation;
 
     public Position asPosition() {
         return new Position(x, y);
+    }
+
+    public static <T extends TrackItem> MapItemEntity of(MapEntity map, T track) {
+        MapItemEntity entity = new MapItemEntity();
+        entity.setMap(map);
+        entity.setX(track.getPosition().col());
+        entity.setY(track.getPosition().row());
+        entity.setType(track.getClass().getName());
+        entity.setRotation(track.getRotation());
+        return entity;
     }
 }

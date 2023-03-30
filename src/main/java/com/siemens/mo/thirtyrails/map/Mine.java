@@ -1,10 +1,10 @@
 package com.siemens.mo.thirtyrails.map;
 
-import com.siemens.mo.thirtyrails.map.track.TrackType;
+import com.siemens.mo.thirtyrails.map.track.TrackItem;
 import com.siemens.mo.thirtyrails.position.Position;
 import com.siemens.mo.thirtyrails.svg.Svg;
 
-public class Mine extends TrackType implements Svg {
+public class Mine extends TrackItem implements Svg {
     protected Mine(Position position) {
         super(position, null);
     }

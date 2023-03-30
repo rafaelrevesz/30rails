@@ -1,6 +1,9 @@
 package com.siemens.mo.thirtyrails.position;
 
-public record Position(int col, int row) {
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
+public record Position(@Min(1) @Max(6) int col, @Min(1) @Max(6) int row) {
 
     public boolean isNextTo(Position otherPosition) {
         if (row == otherPosition.row) {

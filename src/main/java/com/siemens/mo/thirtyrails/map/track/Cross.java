@@ -1,14 +1,18 @@
 package com.siemens.mo.thirtyrails.map.track;
 
-import com.siemens.mo.thirtyrails.map.Rotate;
-import com.siemens.mo.thirtyrails.map.track.TrackType;
+import com.siemens.mo.thirtyrails.map.Rotation;
+import com.siemens.mo.thirtyrails.map.web.TrackDto;
 import com.siemens.mo.thirtyrails.position.Position;
 import com.siemens.mo.thirtyrails.svg.Svg;
 
-public class Cross extends TrackType implements Svg {
+public class Cross extends TrackItem implements Svg {
 
-    public Cross(Position position, Rotate rotate) {
-        super(position, rotate);
+    public Cross(Position position, Rotation rotation) {
+        super(position, rotation);
+    }
+
+    public static Cross of(TrackDto trackDto) {
+        return new Cross(trackDto.position(), trackDto.rotation());
     }
 
     @Override

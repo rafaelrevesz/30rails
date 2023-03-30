@@ -1,7 +1,7 @@
 package com.siemens.mo.thirtyrails.map;
 
 import com.siemens.mo.thirtyrails.diceroll.Dice;
-import com.siemens.mo.thirtyrails.map.track.TrackType;
+import com.siemens.mo.thirtyrails.map.track.TrackItem;
 import com.siemens.mo.thirtyrails.position.Position;
 import com.siemens.mo.thirtyrails.svg.Svg;
 import lombok.extern.slf4j.Slf4j;
@@ -14,65 +14,26 @@ import static com.siemens.mo.thirtyrails.diceroll.DiceType.BW;
 
 @Slf4j
 public class Map implements Svg {
-
     private final Set<Position> mountainPositions = new HashSet<>();
     private Position minePosition;
     private Position bonusPosition;
-    private java.util.Map<Position, Integer> stations = new HashMap<>();
-    private boolean mountainSkipped = false;
-    private Set<TrackType> tracks = new HashSet<>();
+    private final java.util.Map<Position, Integer> stations = new HashMap<>();
+    private final Set<TrackItem> tracks = new HashSet<>();
 
     public void addMountain(Position position) {
-        /*
-        if (isMountainSetupReady()) {
-            throw new IllegalArgumentException("Mountains are already set");
-        }
-        if (mountainPositions.contains(position)) {
-            throw new IllegalArgumentException("Position is already set");
-        }*/
         mountainPositions.add(position);
     }
 
     public void setMine(Position position) {
-        /*
-        if (isMineSetupReady()) {
-            throw new IllegalArgumentException("Mine is already set");
-        }
-        if (!isMountainSetupReady()) {
-            throw new IllegalStateException("Mountains are not set yet");
-        }
-        if (mountainPositions.contains(position)) {
-            throw new IllegalArgumentException("Position is already set");
-        }
-        if (!mountainPositions.stream().anyMatch(p -> p.isNextTo(position))) {
-            throw new IllegalArgumentException("Mine position is invalid");
-        }*/
         minePosition = position;
     }
 
     public void setBonus(Position position) {
-        /*
-        if (!isMountainSetupReady()) {
-            throw new IllegalStateException("Mountains are not set yet");
-        }
-        if (!isMineSetupReady()) {
-            throw new IllegalStateException("Mine is not set yet");
-        }
-        if (isBonusSetupReady()) {
-            throw new IllegalArgumentException("Bonus is already set");
-        }
-        if (mountainPositions.contains(position) || minePosition.equals(position)) {
-            throw new IllegalArgumentException("Position is already set");
-        }*/
         bonusPosition = position;
     }
 
     public void setStation(Position position, int stationId) {
         stations.put(position, stationId);
-    }
-
-    public boolean isMountainSetupReady() {
-        return mountainPositions.size() == 5;
     }
 
     public boolean isMineSetupReady() {
@@ -83,19 +44,8 @@ public class Map implements Svg {
         return bonusPosition != null;
     }
 
-    public boolean isStationSetupReady() {
-        return stations.size() == 4;
-    }
-
-    public void skip() {
-        if (mountainSkipped) {
-            throw new IllegalStateException("One mountain was already skipped");
-        }
-        mountainSkipped = true;
-    }
-
-    public void setTrack(TrackType trackType) {
-        tracks.add(trackType);
+    public void addTrack(TrackItem track) {
+        tracks.add(track);
     }
 
     @Override
@@ -119,7 +69,6 @@ public class Map implements Svg {
             svg.append(drawGrayField(801, 201 + i * 100));
         }
         for (Position position : mountainPositions) {
-            log.info("Mountain x={}, y={}", position.col(), position.row());
             svg.append("<line x1=\"").append(120 + position.col() * 100).append("\" y1=\"").append(180 + position.row() * 100).append("\" x2=\"").append(150 + position.col() * 100).append("\" y2=\"").append(120 + position.row() * 100).append("\" stroke=\"blue\" stroke-width=\"5\"/>\n");
             svg.append("<line x1=\"").append(180 + position.col() * 100).append("\" y1=\"").append(180 + position.row() * 100).append("\" x2=\"").append(150 + position.col() * 100).append("\" y2=\"").append(120 + position.row() * 100).append("\" stroke=\"blue\" stroke-width=\"5\"/>\n");
         }
@@ -139,8 +88,8 @@ public class Map implements Svg {
             svg.append("<rect x=\"").append(101 + bonusPosition.col() * 100).append("\" y=\"").append(101 + bonusPosition.row() * 100).append("\" width=\"98\" height=\"98\" fill=\"lightblue\"/>\n");
         }
 
-        for (TrackType trackType : tracks) {
-            svg.append(trackType.toSvg(200, 200));
+        for (TrackItem trackItem : tracks) {
+            svg.append(trackItem.toSvg(200, 200));
         }
 
         return svg.toString();
