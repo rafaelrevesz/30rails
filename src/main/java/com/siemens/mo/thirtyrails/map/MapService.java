@@ -9,7 +9,6 @@ import com.siemens.mo.thirtyrails.map.persistence.MapItemRepository;
 import com.siemens.mo.thirtyrails.map.persistence.MapRepository;
 import com.siemens.mo.thirtyrails.player.Player;
 import com.siemens.mo.thirtyrails.player.PlayerService;
-import com.siemens.mo.thirtyrails.player.persistence.PlayerRepository;
 import com.siemens.mo.thirtyrails.position.Position;
 import com.siemens.mo.thirtyrails.station.StationOrientation;
 import lombok.RequiredArgsConstructor;
@@ -30,20 +29,9 @@ import static com.siemens.mo.thirtyrails.station.StationOrientation.TOP;
 public class MapService {
     private final MapRepository mapRepository;
     private final GameRepository gameRepository;
-    private final PlayerRepository playerRepository;
     private final MapItemRepository mapItemRepository;
     private final PlayerService playerService;
     private final DiceRollService diceRollService;
-
-    @Transactional
-    public void create(int gameId, String playerName) {
-        var playerEntity = playerRepository.findByGameIdAndName(gameId, playerName).orElseThrow();
-        MapEntity mapEntity = new MapEntity();
-        mapEntity.setPlayer(playerEntity);
-        mapRepository.save(mapEntity);
-        playerEntity.setMap(mapEntity);
-        log.info("Saved");
-    }
 
     @Transactional
     public void addMountain(int gameId, String playerName, Position position) {
@@ -159,9 +147,7 @@ public class MapService {
     }
 
     private MapEntity getMapByGameIdAnPlayerName(int gameId, String playerName) {
-        var player = playerRepository.findByGameIdAndName(gameId, playerName).orElseThrow();
-        var map = mapRepository.findByPlayer(player).orElseThrow();
-        return map;
+        return mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
     }
 
     private boolean isMountainSetupReady(MapEntity map) {

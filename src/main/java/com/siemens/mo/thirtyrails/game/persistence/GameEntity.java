@@ -3,7 +3,7 @@ package com.siemens.mo.thirtyrails.game.persistence;
 import com.siemens.mo.thirtyrails.diceroll.persistence.DiceRollEntity;
 import com.siemens.mo.thirtyrails.game.Game;
 import com.siemens.mo.thirtyrails.game.GameState;
-import com.siemens.mo.thirtyrails.player.persistence.PlayerEntity;
+import com.siemens.mo.thirtyrails.map.persistence.MapEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,7 +29,7 @@ public class GameEntity {
     private GameState state = GameState.REGISTRATION;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "game")
-    private List<PlayerEntity> players;
+    private List<MapEntity> maps;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "game")
     private List<DiceRollEntity> diceRolls;

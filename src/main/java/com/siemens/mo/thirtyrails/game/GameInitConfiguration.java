@@ -28,7 +28,6 @@ public class GameInitConfiguration {
     public void setup() {
         var game = gameService.create();
         var player = playerService.register(game.getId(), "player1");
-        mapService.create(game.getId(), player.getName());
         gameService.start(game.getId());
         DicePair roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
 

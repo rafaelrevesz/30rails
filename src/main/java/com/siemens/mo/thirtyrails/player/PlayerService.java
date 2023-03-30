@@ -1,8 +1,8 @@
 package com.siemens.mo.thirtyrails.player;
 
 import com.siemens.mo.thirtyrails.game.persistence.GameRepository;
-import com.siemens.mo.thirtyrails.player.persistence.PlayerEntity;
-import com.siemens.mo.thirtyrails.player.persistence.PlayerRepository;
+import com.siemens.mo.thirtyrails.map.persistence.MapEntity;
+import com.siemens.mo.thirtyrails.map.persistence.MapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,30 +11,30 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PlayerService {
 
-    private final PlayerRepository playerRepository;
+    private final MapRepository mapRepository;
     private final GameRepository gameRepository;
 
     @Transactional
     public Player register(int gameId, String name) {
-        PlayerEntity playerEntity = new PlayerEntity();
+        MapEntity playerEntity = new MapEntity();
         playerEntity.setGame(gameRepository.findById(gameId).orElseThrow());
-        playerEntity.setName(name);
+        playerEntity.setPlayerName(name);
         playerEntity.setTurn(1);
-        return playerRepository.save(playerEntity).asPlayer();
+        return mapRepository.save(playerEntity).asPlayer();
     }
 
     public void nextTurn(int gameId, String playerName) {
-        var player = playerRepository.findByGameIdAndName(gameId, playerName).orElseThrow();
+        var player = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
         player.setTurn(player.getTurn() + 1);
-        playerRepository.save(player);
+        mapRepository.save(player);
     }
 
     public Player getPlayer(int gameId, String playerName) {
-        return playerRepository.findByGameIdAndName(gameId, playerName).orElseThrow().asPlayer();
+        return mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow().asPlayer();
     }
 
     public void skipTurn(int gameId, String playerName) {
-        var player = playerRepository.findByGameIdAndName(gameId, playerName).orElseThrow();
+        var player = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
         if (player.isMountainSkipped()) {
             throw new IllegalStateException("A mountain was already skipped");
         }
@@ -43,6 +43,6 @@ public class PlayerService {
         }
         player.setTurn(player.getTurn() + 1);
         player.setMountainSkipped(true);
-        playerRepository.save(player);
+        mapRepository.save(player);
     }
 }
