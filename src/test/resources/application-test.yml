@@ -1,0 +1,24 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true #https://www.baeldung.com/hibernate-lazy-loading-workaround workaround to make some badly designed old test cases run which test cases would try to read from lazy loaded entities when the session is already closed
+
+cloud:
+  aws:
+    credentials:
+      access-key: accesskey
+      secret-key: secretkey
+    region:
+      static: us-east-1
+    queue:
+      uri: https://somewhere:1234 #SQS queue uri
+    s3:
+      uri: https://somewhere:1234 #S3 uri
+      bucket: test-bucket
+
+messaging:
+  file-upload-event-queue: test-bogie-inspect-file-upload-event
+  image-detection-job-queue: test-bogie-inspect-detection-job-queue
+  image-detection-job-result: test-bogie-inspect-detection-job-result-queue
+

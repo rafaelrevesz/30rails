@@ -1,0 +1,124 @@
+plugins {
+	id 'java'
+	id 'jacoco'
+	id 'maven-publish'
+	id "org.sonarqube" version "4.0.0.2929"
+	id "io.freefair.lombok" version "6.6.1"
+	id 'org.springframework.boot' version '3.0.1'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'idea'
+	id 'org.barfuin.gradle.jacocolog' version '1.0.1'
+}
+
+def applicationVersion = project.applicationVersion
+
+group = 'com.siemens.mo'
+version = applicationVersion ?: '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+publishing {
+	publications {
+		library(MavenPublication) {
+			artifact bootJar
+		}
+	}
+	repositories {
+		maven {
+			url System.getenv("PACKAGE_REGISTRY_URL")
+			credentials(HttpHeaderCredentials) {
+				name = 'JOB-TOKEN'
+				value = System.getenv("CI_JOB_TOKEN")
+			}
+			authentication {
+				header(HttpHeaderAuthentication)
+			}
+		}
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+
+//https://docs.gradle.org/current/userguide/java_testing.html#sec:configuring_java_integration_tests
+sourceSets {
+	intTest {
+		compileClasspath += sourceSets.main.output
+		runtimeClasspath += sourceSets.main.output
+	}
+}
+
+configurations {
+	intTestImplementation.extendsFrom implementation
+	intTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+//https://youtrack.jetbrains.com/issue/IDEA-151925/IntelliJ-should-be-aware-that-a-custom-sourceSet-contains-Test-sources-for-production-code#focus=Comments-27-4809325.0-0
+//https://youtrack.jetbrains.com/issue/IDEA-151925/IntelliJ-should-be-aware-that-a-custom-sourceSet-contains-Test-sources-for-production-code#focus=Comments-27-6673002.0-0
+idea {
+	module {
+		testSources.from project.sourceSets.intTest.java.srcDirs
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	//implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE'
+	implementation 'org.springframework:spring-messaging:5.3.24'
+	//implementation 'org.flywaydb:flyway-core:9.11.0' // TODO: enable on first deployment! UPDATE init SQL!!!!
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3'
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.387'
+
+	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	testImplementation 'org.awaitility:awaitility:4.2.0'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	//testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.hamcrest:hamcrest:2.2'
+	testImplementation 'org.skyscreamer:jsonassert:1.5.1'
+
+	intTestImplementation 'org.awaitility:awaitility:4.2.0'
+	intTestImplementation 'org.springframework.boot:spring-boot-starter-test'
+	intTestImplementation 'io.awspring.cloud:spring-cloud-aws-test:2.4.1'
+	intTestImplementation 'org.testcontainers:junit-jupiter:1.17.2'
+	intTestImplementation 'org.testcontainers:localstack:1.17.2'
+	intTestImplementation 'org.hamcrest:hamcrest:2.2'
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.enabled true
+		csv.enabled false
+		html.destination file("${buildDir}/jacocoHtml")
+	}
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: 'com/siemens/mo/bogie/importing/messaging/config/**')
+		}))
+	}
+	//https://stackoverflow.com/q/68937691
+	executionData(
+			file("${buildDir}/jacoco/test.exec"),
+			file("${buildDir}/jacoco/intTest.exec")
+	)
+}
+
+test {
+	finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+apply plugin: "org.sonarqube"
