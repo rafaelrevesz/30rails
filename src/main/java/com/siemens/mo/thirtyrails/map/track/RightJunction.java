@@ -5,6 +5,12 @@ import com.siemens.mo.thirtyrails.map.web.TrackDto;
 import com.siemens.mo.thirtyrails.position.Position;
 import com.siemens.mo.thirtyrails.svg.Svg;
 
+import java.util.List;
+
+import static com.siemens.mo.thirtyrails.map.Direction.DOWN;
+import static com.siemens.mo.thirtyrails.map.Direction.LEFT;
+import static com.siemens.mo.thirtyrails.map.Direction.RIGHT;
+import static com.siemens.mo.thirtyrails.map.Direction.UP;
 import static com.siemens.mo.thirtyrails.map.Rotation.DEG180;
 import static com.siemens.mo.thirtyrails.map.Rotation.DEG270;
 import static com.siemens.mo.thirtyrails.map.Rotation.DEG90;
@@ -13,6 +19,23 @@ import static com.siemens.mo.thirtyrails.map.Rotation.NONE;
 public class RightJunction extends TrackItem implements Svg {
     public RightJunction(Position position, Rotation rotation) {
         super(position, rotation);
+        if (rotation == NONE) {
+            connections.put(DOWN, List.of(RIGHT, UP));
+            connections.put(UP, List.of(DOWN));
+            connections.put(RIGHT, List.of(DOWN));
+        } else if (rotation == DEG90) {
+            connections.put(LEFT, List.of(DOWN, RIGHT));
+            connections.put(DOWN, List.of(LEFT));
+            connections.put(RIGHT, List.of(LEFT));
+        } else if (rotation == DEG180) {
+            connections.put(UP, List.of(LEFT, DOWN));
+            connections.put(LEFT, List.of(UP));
+            connections.put(DOWN, List.of(UP));
+        } else if (rotation == DEG270) {
+            connections.put(RIGHT, List.of(UP, LEFT));
+            connections.put(UP, List.of(RIGHT));
+            connections.put(LEFT, List.of(RIGHT));
+        }
     }
 
     public static RightJunction of(TrackDto trackDto) {
@@ -38,5 +61,10 @@ public class RightJunction extends TrackItem implements Svg {
         } else {
             throw new IllegalStateException("Unsupported rotation: " + rotation);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Right junction on " + position;
     }
 }

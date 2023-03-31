@@ -29,4 +29,13 @@ public class PlayerController {
         return ResponseEntity.ok(svgDrawer.drawSvg(diceRoll));
     }
 
+    @GetMapping("/dicerolls")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ResponseEntity<String> gameState(@PathVariable Integer gameId,
+                                            @PathVariable String playerName) {
+
+        var diceRoll = diceRollService.getDiceRollByPlayer(gameId, playerName);
+        return ResponseEntity.ok(svgDrawer.drawSvg(diceRoll));
+    }
+
 }

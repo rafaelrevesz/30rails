@@ -16,17 +16,17 @@ public class PlayerService {
 
     @Transactional
     public Player register(int gameId, String name) {
-        MapEntity playerEntity = new MapEntity();
-        playerEntity.setGame(gameRepository.findById(gameId).orElseThrow());
-        playerEntity.setPlayerName(name);
-        playerEntity.setTurn(1);
-        return mapRepository.save(playerEntity).asPlayer();
+        MapEntity mapEntity = new MapEntity();
+        mapEntity.setGame(gameRepository.findById(gameId).orElseThrow());
+        mapEntity.setPlayerName(name);
+        mapEntity.setTurn(1);
+        return mapRepository.save(mapEntity).asPlayer();
     }
 
     public void nextTurn(int gameId, String playerName) {
-        var player = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
-        player.setTurn(player.getTurn() + 1);
-        mapRepository.save(player);
+        var mapEntity = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
+        mapEntity.setTurn(mapEntity.getTurn() + 1);
+        mapRepository.save(mapEntity);
     }
 
     public Player getPlayer(int gameId, String playerName) {
@@ -34,15 +34,16 @@ public class PlayerService {
     }
 
     public void skipTurn(int gameId, String playerName) {
-        var player = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
-        if (player.isMountainSkipped()) {
+        var mapEntity = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
+        if (mapEntity.isMountainSkipped()) {
             throw new IllegalStateException("A mountain was already skipped");
         }
-        if (player.getTurn() > 6) {
+        if (mapEntity.getTurn() > 6) {
             throw new IllegalStateException("Mountain setup is already done");
         }
-        player.setTurn(player.getTurn() + 1);
-        player.setMountainSkipped(true);
-        mapRepository.save(player);
+        mapEntity.setTurn(mapEntity.getTurn() + 1);
+        mapEntity.setMountainSkipped(true);
+        mapRepository.save(mapEntity);
     }
+
 }

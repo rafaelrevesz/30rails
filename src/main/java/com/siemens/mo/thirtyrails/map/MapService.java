@@ -11,6 +11,7 @@ import com.siemens.mo.thirtyrails.map.track.TrackItem;
 import com.siemens.mo.thirtyrails.map.track.TrackItemFactory;
 import com.siemens.mo.thirtyrails.player.Player;
 import com.siemens.mo.thirtyrails.player.PlayerService;
+import com.siemens.mo.thirtyrails.player.PlayerState;
 import com.siemens.mo.thirtyrails.position.Position;
 import com.siemens.mo.thirtyrails.station.StationOrientation;
 import lombok.RequiredArgsConstructor;
@@ -192,10 +193,13 @@ public class MapService {
                 map.addMountain(mapItem.asPosition());
             } else if (mapItem.getType().equals(Mine.class.getName())) {
                 map.setMine(mapItem.asPosition());
+                map.addTrack(new Mine(mapItem.asPosition()));
             } else if (mapItem.getType().equals("Bonus")) {
                 map.setBonus(mapItem.asPosition());
             } else if (mapItem.getType().startsWith("Station")) {
-                map.setStation(mapItem.asPosition(), Integer.parseInt(mapItem.getType().replace("Station", "")));
+                int stationId = Integer.parseInt(mapItem.getType().replace("Station", ""));
+                map.addTrack(new Station(mapItem.asPosition(), stationId));
+                map.setStation(mapItem.asPosition(), stationId);
             } else {
                 try {
                     map.addTrack(TrackItemFactory.get(mapItem));
@@ -228,5 +232,11 @@ public class MapService {
 
         mapItemRepository.save(MapItemEntity.of(map, track));
         playerService.nextTurn(gameId, playerName);
+    }
+
+    public PlayerState getState(int gameId, String playerName) {
+        var mapEntity = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
+
+        return new PlayerState(mapEntity.getPlayerName(), mapEntity.getTurn(), isMountainSetupReady(mapEntity), isMineSetupReady(mapEntity), isStationSetupReady(mapEntity), diceRollService.getDiceRollByTurn(gameId, mapEntity.getTurn()));
     }
 }

@@ -11,8 +11,8 @@ public class TrackItemFactory {
 
     public static <T extends TrackItem> T get(TrackDto trackDto) {
         return (T)switch (trackDto.type()) {
-            case STRAIGHT -> Line.of(trackDto);
-            case CROSSOVER -> Cross.of(trackDto);
+            case STRAIGHT -> Straight.of(trackDto);
+            case CROSSOVER -> Crossover.of(trackDto);
             case CURVE -> Curve.of(trackDto);
             case Y_JUNCTION -> YJunction.of(trackDto);
             case DOUBLE_CURVE -> DoubleCurve.of(trackDto);

@@ -4,10 +4,12 @@ import com.siemens.mo.thirtyrails.diceroll.Dice;
 import com.siemens.mo.thirtyrails.map.track.TrackItem;
 import com.siemens.mo.thirtyrails.position.Position;
 import com.siemens.mo.thirtyrails.svg.Svg;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static com.siemens.mo.thirtyrails.diceroll.DiceType.BW;
@@ -16,9 +18,10 @@ import static com.siemens.mo.thirtyrails.diceroll.DiceType.BW;
 public class Map implements Svg {
     private final Set<Position> mountainPositions = new HashSet<>();
     private Position minePosition;
+    @Getter
     private Position bonusPosition;
     private final java.util.Map<Position, Integer> stations = new HashMap<>();
-    private final Set<TrackItem> tracks = new HashSet<>();
+    private final java.util.Map<Position, TrackItem> tracks = new HashMap<>();
 
     public void addMountain(Position position) {
         mountainPositions.add(position);
@@ -45,7 +48,7 @@ public class Map implements Svg {
     }
 
     public void addTrack(TrackItem track) {
-        tracks.add(track);
+        tracks.put(track.getPosition(), track);
     }
 
     @Override
@@ -78,17 +81,11 @@ public class Map implements Svg {
             svg.append("<line x1=\"").append(150 + minePosition.col() * 100).append("\" y1=\"").append(140 + minePosition.row() * 100).append("\" x2=\"").append(140 + minePosition.col() * 100).append("\" y2=\"").append(120 + minePosition.row() * 100).append("\" stroke=\"blue\" stroke-width=\"5\"/>\n");
             svg.append("<line x1=\"").append(150 + minePosition.col() * 100).append("\" y1=\"").append(140 + minePosition.row() * 100).append("\" x2=\"").append(160 + minePosition.col() * 100).append("\" y2=\"").append(120 + minePosition.row() * 100).append("\" stroke=\"blue\" stroke-width=\"5\"/>\n");
         }
-
-        for (java.util.Map.Entry<Position, Integer> station : stations.entrySet()) {
-            svg.append("<text x=\"").append(130 + station.getKey().col() * 100).append("\" y=\"").append(180 + station.getKey().row() * 100).append("\" font-family=\"Arial\" font-size=\"80\" stroke=\"none\" fill=\"blue\">");
-            svg.append(station.getValue()).append("</text>\n");
-        }
-
         if (isBonusSetupReady()) {
             svg.append("<rect x=\"").append(101 + bonusPosition.col() * 100).append("\" y=\"").append(101 + bonusPosition.row() * 100).append("\" width=\"98\" height=\"98\" fill=\"lightblue\"/>\n");
         }
 
-        for (TrackItem trackItem : tracks) {
+        for (TrackItem trackItem : tracks.values()) {
             svg.append(trackItem.toSvg(200, 200));
         }
 
@@ -98,4 +95,17 @@ public class Map implements Svg {
     private String drawGrayField(int x, int y) {
         return "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"98\" height=\"98\" fill=\"#AAAAAA\"/>\n";
     }
+
+    public <T extends TrackItem> T getByPosition(Position position) {
+        return (T)tracks.get(position);
+    }
+
+    public List<Station> getStations() {
+        return tracks.values().stream()
+                .filter(Station.class::isInstance)
+                .map(Station.class::cast)
+                .toList();
+
+    }
+
 }

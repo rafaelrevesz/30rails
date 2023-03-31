@@ -1,14 +1,15 @@
 package com.siemens.mo.thirtyrails.map.track;
 
-import com.siemens.mo.thirtyrails.map.Connection;
+import com.siemens.mo.thirtyrails.map.Direction;
 import com.siemens.mo.thirtyrails.map.Rotation;
 import com.siemens.mo.thirtyrails.position.Position;
 import com.siemens.mo.thirtyrails.svg.Svg;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -18,5 +19,13 @@ public abstract class TrackItem implements Svg {
     protected final Position position;
     @Getter
     protected final Rotation rotation;
-    protected List<Connection> connections = new ArrayList<>();
+    protected Map<Direction, List<Direction>> connections = new HashMap<>();
+
+    public boolean canConnectedFrom(Direction direction) {
+        return connections.containsKey(direction);
+    }
+
+    public List<Direction> getConnectionsFrom(Direction direction) {
+        return connections.get(direction);
+    }
 }

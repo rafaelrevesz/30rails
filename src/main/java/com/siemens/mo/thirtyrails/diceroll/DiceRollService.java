@@ -16,8 +16,12 @@ public class DiceRollService {
     private final MapRepository mapRepository;
 
     public DicePair getDiceRollByPlayer(int gameId, String playerName) {
-        var game = gameRepository.findById(gameId).orElseThrow();
         var player = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
-        return diceRollRepository.findByGameAndNumberOfTurn(game, player.getTurn()).map(DiceRollEntity::asDicePair).orElseThrow();
+        return getDiceRollByTurn(gameId, player.getTurn());
+    }
+
+    public DicePair getDiceRollByTurn(int gameId, int turn) {
+        var game = gameRepository.findById(gameId).orElseThrow();
+        return diceRollRepository.findByGameAndNumberOfTurn(game, turn).map(DiceRollEntity::asDicePair).orElseThrow();
     }
 }
