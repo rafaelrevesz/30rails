@@ -1,6 +1,11 @@
 package com.siemens.mo.thirtyrails.player.web;
 
 import com.siemens.mo.thirtyrails.diceroll.DiceRollService;
+import com.siemens.mo.thirtyrails.map.Map;
+import com.siemens.mo.thirtyrails.map.MapService;
+import com.siemens.mo.thirtyrails.map.TrackWalker;
+import com.siemens.mo.thirtyrails.player.Score;
+import com.siemens.mo.thirtyrails.player.ScoreService;
 import com.siemens.mo.thirtyrails.svg.SvgDrawer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping(path = "/games/{gameId}/players/{playerName}")
@@ -19,8 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class PlayerController {
     private final SvgDrawer svgDrawer;
     private final DiceRollService diceRollService;
+    private final ScoreService scoreService;
+    private final MapService mapService;
 
-    @GetMapping("/dicerolls")
+    @GetMapping("/dicerolls/image")
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<String> diceRolls(@PathVariable Integer gameId,
                                             @PathVariable String playerName) {
@@ -29,13 +38,15 @@ public class PlayerController {
         return ResponseEntity.ok(svgDrawer.drawSvg(diceRoll));
     }
 
-    @GetMapping("/dicerolls")
+    @GetMapping("/score/image")
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<String> gameState(@PathVariable Integer gameId,
                                             @PathVariable String playerName) {
 
-        var diceRoll = diceRollService.getDiceRollByPlayer(gameId, playerName);
-        return ResponseEntity.ok(svgDrawer.drawSvg(diceRoll));
+        Map map = mapService.findByGameIdAndPlayerName(gameId, playerName);
+        TrackWalker trackWalker = new TrackWalker(map);
+        Score score = scoreService.calculateScore(trackWalker.walk(), map.getBonusPosition());
+        return ResponseEntity.ok(svgDrawer.drawSvg(score));
     }
 
 }

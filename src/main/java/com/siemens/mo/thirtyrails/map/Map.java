@@ -17,6 +17,7 @@ import static com.siemens.mo.thirtyrails.diceroll.DiceType.BW;
 @Slf4j
 public class Map implements Svg {
     private final Set<Position> mountainPositions = new HashSet<>();
+    @Getter
     private Position minePosition;
     @Getter
     private Position bonusPosition;

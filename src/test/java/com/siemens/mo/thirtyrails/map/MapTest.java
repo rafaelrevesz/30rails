@@ -9,8 +9,6 @@ import com.siemens.mo.thirtyrails.map.track.Straight;
 import com.siemens.mo.thirtyrails.map.track.YJunction;
 import com.siemens.mo.thirtyrails.position.Position;
 import lombok.extern.slf4j.Slf4j;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.junit.jupiter.api.Test;
 
@@ -75,24 +73,24 @@ public class MapTest {
         TrackWalker trackWalker = new TrackWalker(map);
 
         assertThat(trackWalker.walk(station1), containsInAnyOrder(
-                "27-26-36-35-45-44-43-42-32-22-21-11-01",
-                "27-26-36-35-45-44-43-42-52-51-50",
-                "27-26-36-35-45-44-43-42-52-62",
-                "27-26-36-35-34-33-23-22-32-42-43-44-45-55-65-75"));
+                "S1-26-36UL-35-45-44-43-42-32LR-22-21-11-S2",
+                "S1-26-36UL-35-45-44-43-42-52-51-S3",
+                "S1-26-36UL-35-45-44-43-42-52-M",
+                "S1-26-36UL-35-34-33-23-22-32LR-42-43-44-45-55-65LR-S4"));
 
         assertThat(trackWalker.walk(station2), containsInAnyOrder(
-                "01-11-21-22-32-42-43-44-45-35-36-26-27",
-                "01-11-21-22-32-42-43-44-45-55-65-75"));
+                "S2-11-21-22-32LR-42-43-44-45-35-36UL-26-S1",
+                "S2-11-21-22-32LR-42-43-44-45-55-65LR-S4"));
 
         assertThat(trackWalker.walk(station3), containsInAnyOrder(
-                "50-51-52-42-43-44-45-35-36-26-27",
-                "50-51-52-42-43-44-45-55-65-75"));
+                "S3-51-52-42-43-44-45-35-36UL-26-S1",
+                "S3-51-52-42-43-44-45-55-65LR-S4"));
 
         assertThat(trackWalker.walk(station4), containsInAnyOrder(
-                "75-65-55-45-44-43-42-32-22-21-11-01",
-                "75-65-55-45-44-43-42-32-22-23-33-34-35-36-26-27",
-                "75-65-55-45-44-43-42-52-51-50",
-                "75-65-55-45-44-43-42-52-62"));
+                "S4-65LR-55-45-44-43-42-32LR-22-21-11-S2",
+                "S4-65LR-55-45-44-43-42-32LR-22-23-33-34-35-36UL-26-S1",
+                "S4-65LR-55-45-44-43-42-52-51-S3",
+                "S4-65LR-55-45-44-43-42-52-M"));
     }
 
     @Test
@@ -137,7 +135,7 @@ public class MapTest {
         TrackWalker trackWalker = new TrackWalker(map);
 
         assertThat(trackWalker.walk(station2), containsInAnyOrder(
-                "01-11-21-22-23-33-43LR-53-54-44-43UD-42-52-62"));
+                "S2-11-21-22-23-33-43LR-53-54-44-43UD-42-52-M"));
 
     }
 
@@ -183,7 +181,7 @@ public class MapTest {
         TrackWalker trackWalker = new TrackWalker(map);
 
         assertThat(trackWalker.walk(station2), containsInAnyOrder(
-                "01-11-21-22-32-42-43UL-33-34-44-43DR-53-52-62"));
+                "S2-11-21-22-32-42-43UL-33-34-44-43DR-53-52-M"));
     }
 
     @Test
@@ -274,7 +272,7 @@ public class MapTest {
         TrackWalker trackWalker = new TrackWalker(map);
 
         assertThat(trackWalker.walk(station2), containsInAnyOrder(
-                "01-11-21-22-32-42-43-44-45-55-54-53-52-62"));
+                "S2-11-21-22-32-42-43-44-45-55-54-53-52-M"));
     }
 
 }
