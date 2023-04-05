@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.siemens.mo.thirtyrails.diceroll.DiceType.BW;
+import static com.siemens.mo.thirtyrails.diceroll.DiceType.WHITE;
 
 @Slf4j
 public class Map implements Svg {
@@ -26,10 +26,12 @@ public class Map implements Svg {
 
     public void addMountain(Position position) {
         mountainPositions.add(position);
+        tracks.put(position, new Mountain(position));
     }
 
     public void setMine(Position position) {
         minePosition = position;
+        tracks.put(position, new Mine(position));
     }
 
     public void setBonus(Position position) {
@@ -55,7 +57,7 @@ public class Map implements Svg {
     @Override
     public String toSvg(int x, int y) {
         StringBuilder svg = new StringBuilder();
-        Dice[] dices = {new Dice(1, BW), new Dice(2, BW), new Dice(3, BW), new Dice(4, BW), new Dice(5, BW), new Dice(6, BW)};
+        Dice[] dices = {new Dice(1, WHITE), new Dice(2, WHITE), new Dice(3, WHITE), new Dice(4, WHITE), new Dice(5, WHITE), new Dice(6, WHITE)};
 
         svg.append("<rect x=\"0\" y=\"0\" width=\"1000\" height=\"1000\" fill=\"white\"/>\n");
         for (int i = 0; i < 7; i++) {

@@ -67,4 +67,9 @@ public class RightJunction extends TrackItem implements Svg {
     public String toString() {
         return "Right junction on " + position;
     }
+
+    @Override
+    public int allowedRedDiceValue() {
+        return 6;
+    }
 }

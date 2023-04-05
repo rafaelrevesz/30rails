@@ -56,4 +56,9 @@ public class Station extends TrackItem implements Svg {
     public String toString() {
         return "Station " + id + " on " + position;
     }
+
+    @Override
+    public int allowedRedDiceValue() {
+        return 0;
+    }
 }

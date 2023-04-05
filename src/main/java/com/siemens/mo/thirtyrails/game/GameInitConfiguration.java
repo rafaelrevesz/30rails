@@ -5,7 +5,6 @@ import com.siemens.mo.thirtyrails.diceroll.DiceRollService;
 import com.siemens.mo.thirtyrails.map.MapService;
 import com.siemens.mo.thirtyrails.player.PlayerService;
 import com.siemens.mo.thirtyrails.position.Position;
-import com.siemens.mo.thirtyrails.station.StationOrientation;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -31,19 +30,19 @@ public class GameInitConfiguration {
         gameService.start(game.getId());
         DicePair roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
 
-        mapService.addMountain(game.getId(), player.getName(), new Position(roll.bwDice().getValue(), 1));
+        mapService.addMountain(game.getId(), player.getName(), new Position(roll.whiteDice().getValue(), 1));
         roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
-        Position mountPosition = new Position(roll.bwDice().getValue(), 2);
+        Position mountPosition = new Position(roll.whiteDice().getValue(), 2);
         mapService.addMountain(game.getId(), player.getName(), mountPosition);
 
         playerService.skipTurn(game.getId(), player.getName());
 
         roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
-        mapService.addMountain(game.getId(), player.getName(), new Position(roll.bwDice().getValue(), 4));
+        mapService.addMountain(game.getId(), player.getName(), new Position(roll.whiteDice().getValue(), 4));
         roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
-        mapService.addMountain(game.getId(), player.getName(), new Position(roll.bwDice().getValue(), 5));
+        mapService.addMountain(game.getId(), player.getName(), new Position(roll.whiteDice().getValue(), 5));
         roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
-        mapService.addMountain(game.getId(), player.getName(), new Position(roll.bwDice().getValue(), 6));
+        mapService.addMountain(game.getId(), player.getName(), new Position(roll.whiteDice().getValue(), 6));
 
         mapService.setMine(game.getId(), player.getName(), new Position(mountPosition.col(), 3));
         mapService.setBonus(game.getId(), player.getName(), new Position(mountPosition.col() == 4 ? 3 : 4,3));

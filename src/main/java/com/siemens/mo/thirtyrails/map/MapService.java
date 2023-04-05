@@ -1,5 +1,6 @@
 package com.siemens.mo.thirtyrails.map;
 
+import com.siemens.mo.thirtyrails.diceroll.Dice;
 import com.siemens.mo.thirtyrails.diceroll.DiceRollService;
 import com.siemens.mo.thirtyrails.game.GameState;
 import com.siemens.mo.thirtyrails.game.persistence.GameRepository;
@@ -51,7 +52,7 @@ public class MapService {
             throw new IllegalArgumentException("Position corresponds to the wrong turn");
         }
         var dicePair = diceRollService.getDiceRollByPlayer(gameId, playerName);
-        if (position.row() != dicePair.bwDice().getValue() && position.col() != dicePair.bwDice().getValue()) {
+        if (position.row() != dicePair.whiteDice().getValue() && position.col() != dicePair.whiteDice().getValue()) {
             throw new IllegalArgumentException("Dice roll must be used");
         }
         var mapItem = new MapItemEntity();
@@ -184,9 +185,12 @@ public class MapService {
         var stationCount = mapItemRepository.findByMap(map).stream().filter(mapItem -> mapItem.getType().startsWith("Station")).count();
         return stationCount == 4;
     }
-
     public Map findByGameIdAndPlayerName(int gameId, String playerName) {
-        var mapItems = mapItemRepository.findByMap(getMapByGameIdAnPlayerName(gameId, playerName));
+        return findByGameIdAndPlayerName(getMapByGameIdAnPlayerName(gameId, playerName));
+    }
+
+    private Map findByGameIdAndPlayerName(MapEntity mapEntity) {
+        var mapItems = mapItemRepository.findByMap(mapEntity);
         Map map = new Map();
         for (MapItemEntity mapItem : mapItems) {
             if (mapItem.getType().equals(Mountain.class.getName())) {
@@ -218,10 +222,25 @@ public class MapService {
             throw new IllegalStateException("Game is not active");
         }
         var dicePair = diceRollService.getDiceRollByPlayer(gameId, playerName);
-        if (track.getPosition().row() != dicePair.bwDice().getValue() && track.getPosition().col() != dicePair.bwDice().getValue()) {
-            throw new IllegalArgumentException("Dice roll must be used");
-        }
         MapEntity map = getMapByGameIdAnPlayerName(gameId, playerName);
+        boolean overrideWhiteDice = false;
+        boolean overrideRedDice = false;
+        if (track.getPosition().row() != dicePair.whiteDice().getValue() && track.getPosition().col() != dicePair.whiteDice().getValue() && isPositionStillAvailable(map, dicePair.whiteDice())) {
+            if (map.isWhiteDiceOverrode()) {
+                throw new IllegalArgumentException("Invalid position, check the white dice");
+            } else {
+                overrideWhiteDice = true;
+                map.setWhiteDiceOverrode(true);
+            }
+        }
+        if (dicePair.redDice().getValue() != track.allowedRedDiceValue()) {
+            if (map.isRedDiceOverrode()) {
+                throw new IllegalArgumentException("Invalid track type, check the red dice");
+            } else {
+                overrideRedDice = true;
+                map.setRedDiceOverrode(true);
+            }
+        }
         if (!isStationSetupReady(map)) {
             throw new IllegalStateException("Map setup is not ready yet");
         }
@@ -230,13 +249,35 @@ public class MapService {
             throw new IllegalArgumentException("Field is already set by " + field.get().getType());
         }
 
+        if (overrideWhiteDice || overrideRedDice) {
+            mapRepository.save(map);
+        }
+
         mapItemRepository.save(MapItemEntity.of(map, track));
-        playerService.nextTurn(gameId, playerName);
+        int turn = playerService.nextTurn(gameId, playerName);
+        if (turn == 37) {
+            game.setState(GameState.CLOSED);
+            gameRepository.save(game);
+        }
+    }
+
+    private boolean isPositionStillAvailable(MapEntity mapEntity, Dice whiteDice) {
+        Map map = findByGameIdAndPlayerName(mapEntity);
+        for (int i = 1; i <= 6; i++) {
+            if (map.getByPosition(new Position(whiteDice.getValue(), i)) == null) {
+                log.info("Free position at {}:{}", whiteDice.getValue(), i);
+                return true;
+            }
+            if (map.getByPosition(new Position(i, whiteDice.getValue())) == null) {
+                log.info("Free position at {}:{}", i, whiteDice.getValue());
+                return true;
+            }
+        }
+        return false;
     }
 
     public PlayerState getState(int gameId, String playerName) {
-        var mapEntity = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
-
-        return new PlayerState(mapEntity.getPlayerName(), mapEntity.getTurn(), isMountainSetupReady(mapEntity), isMineSetupReady(mapEntity), isStationSetupReady(mapEntity), diceRollService.getDiceRollByTurn(gameId, mapEntity.getTurn()));
+        MapEntity map = getMapByGameIdAnPlayerName(gameId, playerName);
+        return new PlayerState(diceRollService.getDiceRollByPlayer(gameId, playerName), !map.isWhiteDiceOverrode(), !map.isRedDiceOverrode());
     }
 }

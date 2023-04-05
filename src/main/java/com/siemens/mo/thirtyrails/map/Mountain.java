@@ -18,4 +18,9 @@ public class Mountain extends TrackItem implements Svg {
     public String toSvg(int x, int y) {
         return null;
     }
+
+    @Override
+    public int allowedRedDiceValue() {
+        return 0;
+    }
 }

@@ -59,4 +59,9 @@ public class Curve extends TrackItem implements Svg {
     public String toString() {
         return "Curve on " + position;
     }
+
+    @Override
+    public int allowedRedDiceValue() {
+        return 1;
+    }
 }

@@ -23,10 +23,12 @@ public class PlayerService {
         return mapRepository.save(mapEntity).asPlayer();
     }
 
-    public void nextTurn(int gameId, String playerName) {
+    public int nextTurn(int gameId, String playerName) {
         var mapEntity = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
-        mapEntity.setTurn(mapEntity.getTurn() + 1);
+        int turn = mapEntity.getTurn() + 1;
+        mapEntity.setTurn(turn);
         mapRepository.save(mapEntity);
+        return turn;
     }
 
     public Player getPlayer(int gameId, String playerName) {

@@ -36,4 +36,9 @@ public class Crossover extends TrackItem implements Svg {
     public String toString() {
         return "Crossover on " + position;
     }
+
+    @Override
+    public int allowedRedDiceValue() {
+        return 4;
+    }
 }

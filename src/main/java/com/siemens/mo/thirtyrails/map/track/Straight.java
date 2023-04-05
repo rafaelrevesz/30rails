@@ -44,4 +44,9 @@ public class Straight extends TrackItem implements Svg {
     public String toString() {
         return "Straight on " + position;
     }
+
+    @Override
+    public int allowedRedDiceValue() {
+        return 2;
+    }
 }

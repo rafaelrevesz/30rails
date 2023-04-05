@@ -28,4 +28,6 @@ public abstract class TrackItem implements Svg {
     public List<Direction> getConnectionsFrom(Direction direction) {
         return connections.get(direction);
     }
+
+    public abstract int allowedRedDiceValue();
 }

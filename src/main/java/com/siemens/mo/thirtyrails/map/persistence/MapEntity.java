@@ -31,6 +31,8 @@ public class MapEntity {
     private String playerName;
     private int turn;
     private boolean mountainSkipped;
+    private boolean whiteDiceOverrode;
+    private boolean redDiceOverrode;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "map")
     private List<MapItemEntity> mapItems;

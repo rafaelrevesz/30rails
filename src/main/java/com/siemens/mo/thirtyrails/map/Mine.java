@@ -30,4 +30,9 @@ public class Mine extends TrackItem implements Svg {
     public String toString() {
         return "Mine on " + position;
     }
+
+    @Override
+    public int allowedRedDiceValue() {
+        return 0;
+    }
 }
