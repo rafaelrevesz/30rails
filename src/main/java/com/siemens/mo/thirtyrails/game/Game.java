@@ -17,6 +17,7 @@ public class Game {
     private final int id;
     private java.util.Map<String, Player> players = new HashMap<>();
     private List<DicePair> diceRolls = new ArrayList<>();
+    @Getter
     private final GameState state;
 
 }

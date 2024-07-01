@@ -62,7 +62,7 @@ class MapSer1viceTest {
 
         when(gameRepository.findById(eq(gameId))).thenReturn(Optional.of(gameEntity));
         when(diceRollService.getDiceRollByPlayer(eq(gameId), eq(playerName))).thenReturn(
-                new DicePair(new Dice(3, WHITE), new Dice(3, RED))
+                Optional.of(new DicePair(new Dice(3, WHITE), new Dice(3, RED)))
         );
         MapEntity mapEntity = new MapEntity();
         mapEntity.setRedDiceOverrode(true);
@@ -112,7 +112,7 @@ class MapSer1viceTest {
         when(mapItemRepository.findByMapAndXAndY(eq(mapEntity), anyInt(), anyInt())).thenReturn(Optional.empty());
 
         // When
-        mapService.setTrack(gameId, playerName, new DoubleCurve(new Position(6, 6), NONE));
+        mapService.setTrack(gameId, playerName, new DoubleCurve(new Position(6, 6), NONE), false);
     }
 
     private MapItemEntity mapItemEntity(int x, int y, String itemName) {

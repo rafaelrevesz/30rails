@@ -1,7 +1,9 @@
 package com.siemens.mo.thirtyrails.map;
 
 import com.siemens.mo.thirtyrails.diceroll.Dice;
+import com.siemens.mo.thirtyrails.diceroll.DicePair;
 import com.siemens.mo.thirtyrails.diceroll.DiceRollService;
+import com.siemens.mo.thirtyrails.diceroll.DiceType;
 import com.siemens.mo.thirtyrails.game.GameState;
 import com.siemens.mo.thirtyrails.game.persistence.GameRepository;
 import com.siemens.mo.thirtyrails.map.persistence.MapEntity;
@@ -21,7 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
+import static com.siemens.mo.thirtyrails.diceroll.DiceType.RED;
+import static com.siemens.mo.thirtyrails.diceroll.DiceType.WHITE;
 import static com.siemens.mo.thirtyrails.station.StationOrientation.BOTTOM;
 import static com.siemens.mo.thirtyrails.station.StationOrientation.LEFT;
 import static com.siemens.mo.thirtyrails.station.StationOrientation.RIGHT;
@@ -51,9 +56,9 @@ public class MapService {
         if (position.row() != player.getTurn()) {
             throw new IllegalArgumentException("Position corresponds to the wrong turn");
         }
-        var dicePair = diceRollService.getDiceRollByPlayer(gameId, playerName);
+        var dicePair = diceRollService.getDiceRollByPlayer(gameId, playerName).orElseThrow();
         if (position.row() != dicePair.whiteDice().getValue() && position.col() != dicePair.whiteDice().getValue()) {
-            throw new IllegalArgumentException("Dice roll must be used");
+            throw new IllegalArgumentException("Invalid position, check the white dice roll must be used");
         }
         var mapItem = new MapItemEntity();
         mapItem.setMap(map);
@@ -62,6 +67,19 @@ public class MapService {
         mapItem.setType(Mountain.class.getName());
         mapItemRepository.save(mapItem);
         playerService.nextTurn(gameId, playerName);
+    }
+
+    public void skipMountain(int gameId, String playerName) {
+        var mapEntity = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
+        if (mapEntity.isMountainSkipped()) {
+            throw new IllegalStateException("A mountain was already skipped");
+        }
+        if (mapEntity.getTurn() > 6) {
+            throw new IllegalStateException("Mountain setup is already done");
+        }
+        mapEntity.setTurn(mapEntity.getTurn() + 1);
+        mapEntity.setMountainSkipped(true);
+        mapRepository.save(mapEntity);
     }
 
     @Transactional
@@ -156,7 +174,7 @@ public class MapService {
 
     private boolean isMountainSetupReady(MapEntity map) {
         var mountainCount = mapItemRepository.findByMap(map).stream().filter(mapItem -> mapItem.getType().equals(Mountain.class.getName())).count();
-        return mountainCount == 5;
+        return (mountainCount == 5 && map.isMountainSkipped()) || mountainCount == 6;
     }
 
     private boolean isMineSetupReady(MapEntity map) {
@@ -216,29 +234,37 @@ public class MapService {
     }
 
     @Transactional
-    public <T extends TrackItem> void setTrack(int gameId, String playerName, T track) {
+    public <T extends TrackItem> void setTrack(int gameId, String playerName, T track, boolean override) {
         var game = gameRepository.findById(gameId).orElseThrow();
         if (game.getState() != GameState.PLAY) {
             throw new IllegalStateException("Game is not active");
         }
-        var dicePair = diceRollService.getDiceRollByPlayer(gameId, playerName);
+        var dicePair = diceRollService.getDiceRollByPlayer(gameId, playerName).orElseThrow();
         MapEntity map = getMapByGameIdAnPlayerName(gameId, playerName);
         boolean overrideWhiteDice = false;
         boolean overrideRedDice = false;
         if (track.getPosition().row() != dicePair.whiteDice().getValue() && track.getPosition().col() != dicePair.whiteDice().getValue() && isPositionStillAvailable(map, dicePair.whiteDice())) {
-            if (map.isWhiteDiceOverrode()) {
-                throw new IllegalArgumentException("Invalid position, check the white dice");
+            if (override) {
+                if (map.isWhiteDiceOverrode()) {
+                    throw new IllegalArgumentException("Invalid position, check the white dice (override not possible anymore)");
+                } else {
+                    overrideWhiteDice = true;
+                    map.setWhiteDiceOverrode(true);
+                }
             } else {
-                overrideWhiteDice = true;
-                map.setWhiteDiceOverrode(true);
+                throw new IllegalArgumentException("Invalid position, check the white dice");
             }
         }
         if (dicePair.redDice().getValue() != track.allowedRedDiceValue()) {
-            if (map.isRedDiceOverrode()) {
-                throw new IllegalArgumentException("Invalid track type, check the red dice");
+            if (override) {
+                if (map.isRedDiceOverrode()) {
+                    throw new IllegalArgumentException("Invalid track type, check the red dice (override not possible anymore)");
+                } else {
+                    overrideRedDice = true;
+                    map.setRedDiceOverrode(true);
+                }
             } else {
-                overrideRedDice = true;
-                map.setRedDiceOverrode(true);
+                throw new IllegalArgumentException("Invalid track type, check the red dice");
             }
         }
         if (!isStationSetupReady(map)) {
@@ -278,6 +304,7 @@ public class MapService {
 
     public PlayerState getState(int gameId, String playerName) {
         MapEntity map = getMapByGameIdAnPlayerName(gameId, playerName);
-        return new PlayerState(diceRollService.getDiceRollByPlayer(gameId, playerName), !map.isWhiteDiceOverrode(), !map.isRedDiceOverrode());
+        var dicePair = diceRollService.getDiceRollByPlayer(gameId, playerName).orElse(new DicePair(new Dice(0, WHITE), new Dice(0, RED)));
+        return new PlayerState(dicePair, !map.isWhiteDiceOverrode(), !map.isRedDiceOverrode());
     }
 }

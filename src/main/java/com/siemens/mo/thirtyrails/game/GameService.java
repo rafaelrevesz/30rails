@@ -7,6 +7,8 @@ import com.siemens.mo.thirtyrails.game.persistence.GameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
+
 @Service
 @RequiredArgsConstructor
 public class GameService {
@@ -15,18 +17,15 @@ public class GameService {
     private final DiceRollRepository diceRollRepository;
 
     public Game create() {
+        Random randomGenerator = new Random(System.currentTimeMillis());
         GameEntity gameEntity = new GameEntity();
         GameEntity persistedGameEntity = gameRepository.save(gameEntity);
-        for (int i = 0; i < 35; i++) {
-            var diceRollEntity = DiceRollEntity.of(i + 1, getRandomIntegerBetween0and6(), getRandomIntegerBetween0and6());
+        for (int i = 0; i < 36; i++) {
+            var diceRollEntity = DiceRollEntity.of(i + 1, randomGenerator.nextInt(6) + 1, randomGenerator.nextInt(6) + 1);
             diceRollEntity.setGame(persistedGameEntity);
             diceRollRepository.save(diceRollEntity);
         }
         return persistedGameEntity.asGame();
-    }
-
-    private int getRandomIntegerBetween0and6() {
-        return (int) Math.round(Math.random() * 5) + 1;
     }
 
     public Game start(int gameId) {

@@ -34,18 +34,4 @@ public class PlayerService {
     public Player getPlayer(int gameId, String playerName) {
         return mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow().asPlayer();
     }
-
-    public void skipTurn(int gameId, String playerName) {
-        var mapEntity = mapRepository.findByGameIdAndPlayerName(gameId, playerName).orElseThrow();
-        if (mapEntity.isMountainSkipped()) {
-            throw new IllegalStateException("A mountain was already skipped");
-        }
-        if (mapEntity.getTurn() > 6) {
-            throw new IllegalStateException("Mountain setup is already done");
-        }
-        mapEntity.setTurn(mapEntity.getTurn() + 1);
-        mapEntity.setMountainSkipped(true);
-        mapRepository.save(mapEntity);
-    }
-
 }

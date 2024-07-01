@@ -29,7 +29,9 @@ public class TrackWalker {
         for (Station station : map.getStations()) {
             stationIndexMapping.put(station.getPosition().index(), "" + station.getId());
         }
-        stationIndexMapping.put(map.getMinePosition().index(), "M");
+        if (map.getMinePosition() != null) {
+            stationIndexMapping.put(map.getMinePosition().index(), "M");
+        }
     }
 
     public java.util.Map<Integer, List<String>> walk() {

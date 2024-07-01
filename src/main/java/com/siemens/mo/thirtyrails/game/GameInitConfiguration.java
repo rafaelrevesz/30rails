@@ -14,7 +14,7 @@ import static com.siemens.mo.thirtyrails.station.StationOrientation.LEFT;
 import static com.siemens.mo.thirtyrails.station.StationOrientation.RIGHT;
 import static com.siemens.mo.thirtyrails.station.StationOrientation.TOP;
 
-@Configuration
+//@Configuration
 @RequiredArgsConstructor
 public class GameInitConfiguration {
 
@@ -28,20 +28,20 @@ public class GameInitConfiguration {
         var game = gameService.create();
         var player = playerService.register(game.getId(), "player1");
         gameService.start(game.getId());
-        DicePair roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
+        DicePair roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName()).get();
 
         mapService.addMountain(game.getId(), player.getName(), new Position(roll.whiteDice().getValue(), 1));
-        roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
+        roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName()).get();
         Position mountPosition = new Position(roll.whiteDice().getValue(), 2);
         mapService.addMountain(game.getId(), player.getName(), mountPosition);
 
-        playerService.skipTurn(game.getId(), player.getName());
+        mapService.skipMountain(game.getId(), player.getName());
 
-        roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
+        roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName()).get();
         mapService.addMountain(game.getId(), player.getName(), new Position(roll.whiteDice().getValue(), 4));
-        roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
+        roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName()).get();
         mapService.addMountain(game.getId(), player.getName(), new Position(roll.whiteDice().getValue(), 5));
-        roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName());
+        roll = diceRollService.getDiceRollByPlayer(game.getId(), player.getName()).get();
         mapService.addMountain(game.getId(), player.getName(), new Position(roll.whiteDice().getValue(), 6));
 
         mapService.setMine(game.getId(), player.getName(), new Position(mountPosition.col(), 3));

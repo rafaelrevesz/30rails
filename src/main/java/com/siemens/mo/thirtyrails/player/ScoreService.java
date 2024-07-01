@@ -28,7 +28,7 @@ public class ScoreService {
 
     public Score calculateScore(java.util.Map<Integer, List<String>> walkResults, Position bonusPosition) {
 
-        String bonusIndex =bonusPosition.index();
+        String bonusIndex = bonusPosition == null ? "" : bonusPosition.index();
         int mineCount = 0;
         Set<String> processedLine = new HashSet<>();
 
