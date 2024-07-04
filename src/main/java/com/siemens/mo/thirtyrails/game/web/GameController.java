@@ -41,6 +41,7 @@ public class GameController {
                 .path("/games/{gameId}")
                 .buildAndExpand(gameResource.id())
                 .toUri();
+        log.info("Game initialized: {}", gameResource.id());
 
         return ResponseEntity.created(location).body(gameResource);
     }
@@ -49,7 +50,16 @@ public class GameController {
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<GameResource> startGame(@PathVariable Integer gameId) {
 
+        log.info("Game start: {}", gameId);
         return ResponseEntity.ok(GameResource.of(gameService.start(gameId)));
+    }
+
+    @PostMapping("/{gameId}/close")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ResponseEntity<GameResource>closeGame(@PathVariable Integer gameId) {
+
+        log.info("Game close: {}", gameId);
+        return ResponseEntity.ok(GameResource.of(gameService.close(gameId)));
     }
 
     @GetMapping("/{gameId}/dicerolls")

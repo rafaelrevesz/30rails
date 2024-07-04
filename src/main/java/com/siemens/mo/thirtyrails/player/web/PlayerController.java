@@ -1,5 +1,6 @@
 package com.siemens.mo.thirtyrails.player.web;
 
+import com.siemens.mo.thirtyrails.diceroll.DicePair;
 import com.siemens.mo.thirtyrails.diceroll.DiceRollService;
 import com.siemens.mo.thirtyrails.map.Map;
 import com.siemens.mo.thirtyrails.map.MapService;
@@ -50,17 +51,26 @@ public class PlayerController {
                 .buildAndExpand(gameId, player.getName())
                 .toUri();
 
+        log.info("Player {} registered for game {}", playerDto.name(), gameId);
+
         return ResponseEntity.created(location).body(new PlayerResource(player.getName()));
     }
 
 
     @GetMapping(value = "/{playerName}/dicerolls/image", produces = "image/svg+xml")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<String> diceRolls(@PathVariable Integer gameId,
+    public ResponseEntity<String> diceRollsImage(@PathVariable Integer gameId,
                                             @PathVariable String playerName) {
 
         var diceRoll = diceRollService.getDiceRollByPlayer(gameId, playerName).orElseThrow();
         return ResponseEntity.ok(svgDrawer.drawSvg(diceRoll, 200, 100));
+    }
+
+    @GetMapping(value = "/{playerName}/dicerolls")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ResponseEntity<DicePair> diceRolls(@PathVariable Integer gameId,
+                                              @PathVariable String playerName) {
+        return ResponseEntity.ok(diceRollService.getDiceRollByPlayer(gameId, playerName).orElseThrow());
     }
 
     @GetMapping(value = "/{playerName}/score/image", produces = "image/svg+xml")

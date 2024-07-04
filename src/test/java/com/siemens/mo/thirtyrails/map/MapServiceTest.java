@@ -37,7 +37,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MapSer1viceTest {
+class MapServiceTest {
 
     @Mock
     private MapRepository mapRepository;

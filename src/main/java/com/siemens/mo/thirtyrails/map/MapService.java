@@ -252,7 +252,7 @@ public class MapService {
                     map.setWhiteDiceOverrode(true);
                 }
             } else {
-                throw new IllegalArgumentException("Invalid position, check the white dice");
+                throw new IllegalArgumentException("Invalid position (" + track.getPosition().col() + ", " + track.getPosition().row() + "), check the white dice (" + dicePair.whiteDice().getValue() + ")");
             }
         }
         if (dicePair.redDice().getValue() != track.allowedRedDiceValue()) {
@@ -264,7 +264,7 @@ public class MapService {
                     map.setRedDiceOverrode(true);
                 }
             } else {
-                throw new IllegalArgumentException("Invalid track type, check the red dice");
+                throw new IllegalArgumentException("Invalid track type (" + track.getClass().getName() + "), check the red dice (" + dicePair.redDice().getValue() + ")");
             }
         }
         if (!isStationSetupReady(map)) {
@@ -281,10 +281,11 @@ public class MapService {
 
         mapItemRepository.save(MapItemEntity.of(map, track));
         int turn = playerService.nextTurn(gameId, playerName);
+        /*
         if (turn == 37) {
             game.setState(GameState.CLOSED);
             gameRepository.save(game);
-        }
+        }*/
     }
 
     private boolean isPositionStillAvailable(MapEntity mapEntity, Dice whiteDice) {

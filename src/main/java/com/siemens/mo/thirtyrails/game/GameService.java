@@ -33,4 +33,10 @@ public class GameService {
         game.setState(GameState.PLAY);
         return gameRepository.save(game).asGame();
     }
+
+    public Game close(int gameId) {
+        var game = gameRepository.findById(gameId).orElseThrow();
+        game.setState(GameState.CLOSED);
+        return gameRepository.save(game).asGame();
+    }
 }

@@ -38,7 +38,7 @@ public class MapController {
         return ResponseEntity.ok(svgDrawer.drawSvg(map, 1000, 1000));
     }
 
-    @PostMapping
+    @PostMapping("/track")
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<Void> setTrack(@PathVariable Integer gameId,
                                          @PathVariable String playerName,
